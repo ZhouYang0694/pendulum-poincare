@@ -20,7 +20,7 @@ pub fn build_stepper(method: IntegratorMethod) -> Box<dyn Stepper> {
 	}
 }
 
-pub fn integrate_warmup(stepper: &mut dyn Stepper, mut state: State, phys: &PhysicalParams, dt: f64, steps: usize) -> State {
+pub fn integrate_warmup(stepper: &mut dyn Stepper, state: State, phys: &PhysicalParams, dt: f64, steps: usize) -> State {
 	let mut current = state;
 	for _ in 0..steps {
 		current = stepper.step(current, phys, dt);
@@ -28,8 +28,8 @@ pub fn integrate_warmup(stepper: &mut dyn Stepper, mut state: State, phys: &Phys
 	current
 }
 
-pub fn integrate_and_sample(stepper: &mut dyn Stepper, mut state: State, phys: &PhysicalParams, dt: f64, steps: usize, sampler: &mut PoincareSampler) -> Vec<SamplePoint> {
-	let reserve = steps / sampler.k + 1;
+pub fn integrate_and_sample(stepper: &mut dyn Stepper, state: State, phys: &PhysicalParams, dt: f64, steps: usize, sampler: &mut PoincareSampler) -> Vec<SamplePoint> {
+	let reserve = if sampler.k == 0 { 0 } else { steps / sampler.k + 1 };
 	let mut points = Vec::with_capacity(reserve);
 	let mut current = state;
 	for _ in 0..steps {

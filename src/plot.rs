@@ -2,30 +2,29 @@ use crate::types::*;
 use plotly::common::{Mode, Title};
 use plotly::layout::Axis;
 use plotly::{Layout, Plot, Scatter};
+use plotters::coord::Shift;
 use plotters::prelude::*;
 use std::f64::consts::PI;
 
+fn draw_chart<B: DrawingBackend>(area: DrawingArea<B, Shift>, view: &PlotView, points: &[(f64, f64)]) {
+	let _ = area.fill(&WHITE);
+	if let Ok(mut chart) = ChartBuilder::on(&area)
+		.margin(20)
+		.caption(view.title.clone(), ("sans-serif", 20))
+		.build_cartesian_2d(-PI..PI, view.omega_min..view.omega_max)
+	{
+		let _ = chart.configure_mesh().disable_mesh().draw();
+		let series = points.iter().map(|(x, y)| Circle::new((*x, *y), 2, RED.filled()));
+		let _ = chart.draw_series(series);
+	}
+	let _ = area.present();
+}
+
 pub fn save_static(points: &[(f64, f64)], view: &PlotView, out_png: &str, out_svg: &str) {
-	let png_size = (view.width_px as u32, view.height_px as u32);
-	let svg_size = (view.width_px, view.height_px);
-	let png_backend = BitMapBackend::new(out_png, png_size);
-	let svg_backend = SVGBackend::new(out_svg, svg_size);
-	let draw = |backend: DrawingArea<_, _>| {
-		backend.fill(&WHITE).ok();
-		if let Ok(mut chart) = ChartBuilder::on(&backend)
-			.margin(20)
-			.caption(view.title.clone(), ("sans-serif", 20))
-			.build_cartesian_2d(-PI..PI, view.omega_min..view.omega_max)
-		{
-			chart.configure_mesh().disable_mesh().draw().ok();
-			chart
-				.draw_series(points.iter().map(|(x, y)| Circle::new((*x, *y), 2, RED.filled())))
-				.ok();
-		}
-		backend.present().ok();
-	};
-	draw(png_backend.into_drawing_area());
-	draw(svg_backend.into_drawing_area());
+	let png_backend = BitMapBackend::new(out_png, (view.width_px as u32, view.height_px as u32));
+	let svg_backend = SVGBackend::new(out_svg, (view.width_px, view.height_px));
+	draw_chart(png_backend.into_drawing_area(), view, points);
+	draw_chart(svg_backend.into_drawing_area(), view, points);
 }
 
 pub fn save_html(points: &[(f64, f64)], view: &PlotView, out_html: &str) {
@@ -39,7 +38,7 @@ pub fn save_html(points: &[(f64, f64)], view: &PlotView, out_html: &str) {
 	let mut plot = Plot::new();
 	plot.add_trace(trace);
 	plot.set_layout(layout);
-	plot.write_html(out_html).ok();
+	plot.write_html(out_html);
 }
 
 pub fn save_all(points: &[(f64, f64)], view: &PlotView, out_base: &str) {
