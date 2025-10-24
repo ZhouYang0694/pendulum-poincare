@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde
-serde_json
-plotters
-plotters-svg
-plotly
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+plotters = "0.3"
+plotters-svg = "0.3"
+plotly = "0.8"
