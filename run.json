@@ -8,6 +8,7 @@
   },
   "integrator": {
     "method": "RK4",
+    "dt_user": 0.02,
     "n_periods_warmup": 300,
     "n_periods_samples": 2500
   },
