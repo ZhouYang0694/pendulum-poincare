@@ -8,7 +8,7 @@ pub mod plot;
 
 pub use settings::load_run_spec;
 pub use simulate::run;
-pub use plot::save_all;
+pub use plot::{save_all, save_all_x};
 
 pub use types::RunSpec;
 pub use types::PhysicalParams;

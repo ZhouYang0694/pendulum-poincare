@@ -8,6 +8,7 @@
   },
   "integrator": {
     "method": "RK4",
+    "dt_user": 0.02,
     "n_periods_warmup": 300,
     "n_periods_samples": 2500
   },
@@ -20,13 +21,9 @@
     "wrap_to_pi": true
   },
   "plot": {
-    "theta_min": -3.141592653589793,
-    "theta_max": 3.141592653589793,
-    "omega_min": -2.0,
-    "omega_max": 3.0,
-    "width_px": 1200,
-    "height_px": 900,
-    "title": "Poincaré Section (F_D = 1.2, RK4)"
+    "side_px": 1200,
+    "title": "Poincaré Section (F_D = 1.2, RK4)",
+    "marker_size": 1
   },
   "output": {
     "out_base": "fig3_9"
