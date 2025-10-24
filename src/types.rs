@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum IntegratorMethod {
     EulerCromer,
-    RK4
+    RK4,
+    RK45,
+    BulirschStoer
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
@@ -20,7 +22,12 @@ pub struct IntegratorParams {
     pub method: IntegratorMethod,
     pub dt_user: Option<f64>,
     pub n_periods_warmup: usize,
-    pub n_periods_samples: usize
+    pub n_periods_samples: usize,
+    pub rtol: Option<f64>,
+    pub atol: Option<f64>,
+    pub dt_init: Option<f64>,
+    pub dt_min: Option<f64>,
+    pub dt_max: Option<f64>
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]

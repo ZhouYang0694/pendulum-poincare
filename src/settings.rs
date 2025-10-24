@@ -31,6 +31,22 @@ pub fn load_run_spec(path: &str) -> RunSpec {
 			spec.plot.marker_size = None;
 		}
 	}
+	let period = drive_period(spec.phys.omega_d);
+	if spec.integrator.rtol.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.rtol = Some(1e-8);
+	}
+	if spec.integrator.atol.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.atol = Some(1e-10);
+	}
+	if spec.integrator.dt_init.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.dt_init = Some(period / 400.0);
+	}
+	if spec.integrator.dt_min.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.dt_min = Some(period / 20000.0);
+	}
+	if spec.integrator.dt_max.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.dt_max = Some(period / 20.0);
+	}
 	derive_outputs(&mut spec);
 	validate_run_spec(&spec);
 	spec
