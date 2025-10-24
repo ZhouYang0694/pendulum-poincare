@@ -21,7 +21,8 @@
   },
   "plot": {
     "side_px": 1200,
-    "title": "Poincaré Section (F_D = 1.2, RK4)"
+    "title": "Poincaré Section (F_D = 1.2, RK4)",
+    "marker_size": 1
   },
   "output": {
     "out_base": "fig3_9"

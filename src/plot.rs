@@ -6,6 +6,7 @@ use plotters::coord::Shift;
 use plotters::prelude::*;
 use std::path::Path;
 
+
 fn square_side(view: &PlotView) -> (u32, u32) {
 	let side = view.side_px;
 	(side, side)
@@ -56,6 +57,13 @@ fn marker_radius(px: u32) -> i32 {
 	if px >= 1000 { 2 } else { 1 }
 }
 
+fn effective_marker_radius(view: &PlotView, side_px: u32) -> i32 {
+	match view.marker_size {
+		Some(n) => n as i32,
+		None => marker_radius(side_px),
+	}
+}
+
 fn draw_static_chart<B: DrawingBackend>(
 	area: DrawingArea<B, Shift>,
 	view: &PlotView,
@@ -65,6 +73,8 @@ fn draw_static_chart<B: DrawingBackend>(
 	rx: &[i32],
 	ry: &[i32],
 	radius: i32,
+	x_min: f64,
+	x_max: f64,
 ) {
 	let _ = area.fill(&WHITE);
 	let mut builder = ChartBuilder::on(&area);
@@ -72,7 +82,7 @@ fn draw_static_chart<B: DrawingBackend>(
 	builder
 		.set_label_area_size(LabelAreaPosition::Left, 110)
 		.set_label_area_size(LabelAreaPosition::Bottom, 90);
-	if let Ok(mut chart) = builder.build_cartesian_2d(-4.0..4.0, y_min..y_max) {
+	if let Ok(mut chart) = builder.build_cartesian_2d(x_min..x_max, y_min..y_max) {
 		let mut mesh = chart.configure_mesh();
 		let _ = mesh
 			.disable_mesh()
@@ -90,43 +100,43 @@ fn draw_static_chart<B: DrawingBackend>(
 		let frame_style = ShapeStyle::from(&BLACK).stroke_width(2);
 		let _ = chart
 			.plotting_area()
-			.draw(&Rectangle::new([(-4.0, y_min), (4.0, y_max)], frame_style));
+			.draw(&Rectangle::new([(x_min, y_min), (x_max, y_max)], frame_style));
 	}
 	let _ = area.present();
 }
 
 
-pub fn save_static(points: &[(f64, f64)], view: &PlotView, out_png: &str, out_svg: &str) {
+fn save_static_with_x(points: &[(f64, f64)], view: &PlotView, out_png: &str, out_svg: &str, x_min: f64, x_max: f64) {
 	let (w, h) = square_side(view);
 	let (y_min, y_max) = data_y_range(points);
-	let x_ticks: Vec<i32> = (-4..=4).collect();
+	let x_ticks: Vec<i32> = integer_ticks_in_range(x_min, x_max);
 	let y_ticks = integer_ticks_in_range(y_min, y_max);
-	let r = marker_radius(w);
+	let r = effective_marker_radius(view, w);
 	let png_backend = BitMapBackend::new(out_png, (w, h));
 	let svg_backend = SVGBackend::new(out_svg, (w, h));
-	draw_static_chart(png_backend.into_drawing_area(), view, points, y_min, y_max, &x_ticks, &y_ticks, r);
-	draw_static_chart(svg_backend.into_drawing_area(), view, points, y_min, y_max, &x_ticks, &y_ticks, r);
+	draw_static_chart(png_backend.into_drawing_area(), view, points, y_min, y_max, &x_ticks, &y_ticks, r, x_min, x_max);
+	draw_static_chart(svg_backend.into_drawing_area(), view, points, y_min, y_max, &x_ticks, &y_ticks, r, x_min, x_max);
 }
 
 
-pub fn save_html(points: &[(f64, f64)], view: &PlotView, out_html: &str) {
+fn save_html_with_x(points: &[(f64, f64)], view: &PlotView, out_html: &str, x_min: f64, x_max: f64) {
 	let (w, h) = square_side(view);
 	let (y_min, y_max) = data_y_range(points);
 	let xs: Vec<f64> = points.iter().map(|(x, _)| *x).collect();
 	let ys: Vec<f64> = points.iter().map(|(_, y)| *y).collect();
-	let mut x_tick_vals = Vec::new();
-	for v in -4..=4 {
-		x_tick_vals.push(v as f64);
-	}
+	let x_tick_vals: Vec<f64> = integer_ticks_in_range(x_min, x_max)
+		.into_iter()
+		.map(|v| v as f64)
+		.collect();
 	let y_tick_vals: Vec<f64> = integer_ticks_in_range(y_min, y_max)
 		.into_iter()
 		.map(|v| v as f64)
 		.collect();
 	let trace = Scatter::new(xs, ys)
 		.mode(Mode::Markers)
-		.marker(Marker::new().size(3).opacity(0.8).color("black"));
+		.marker(Marker::new().size(effective_marker_radius(view, w) as usize).opacity(0.8).color("black"));
 	let x_axis = Axis::new()
-		.range(vec![-4.0, 4.0])
+		.range(vec![x_min, x_max])
 		.show_grid(false)
 		.zero_line(false)
 		.show_line(true)
@@ -168,6 +178,10 @@ pub fn save_html(points: &[(f64, f64)], view: &PlotView, out_html: &str) {
 }
 
 pub fn save_all(points: &[(f64, f64)], view: &PlotView, out_base: &str) {
+	save_all_x(points, view, out_base, -4.0, 4.0);
+}
+
+pub fn save_all_x(points: &[(f64, f64)], view: &PlotView, out_base: &str, x_min: f64, x_max: f64) {
 	let output_dir = Path::new("output");
 	std::fs::create_dir_all(output_dir).expect("failed to create output directory");
 	let base_path = output_dir.join(out_base);
@@ -175,6 +189,6 @@ pub fn save_all(points: &[(f64, f64)], view: &PlotView, out_base: &str) {
 	let out_png = format!("{base_str}.png");
 	let out_svg = format!("{base_str}.svg");
 	let out_html = format!("{base_str}.html");
-	save_static(points, view, &out_png, &out_svg);
-	save_html(points, view, &out_html);
+	save_static_with_x(points, view, &out_png, &out_svg, x_min, x_max);
+	save_html_with_x(points, view, &out_html, x_min, x_max);
 }

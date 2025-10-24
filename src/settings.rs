@@ -26,6 +26,11 @@ pub fn load_run_spec(path: &str) -> RunSpec {
 		panic!("run spec root must be a JSON object");
 	}
 	let mut spec: RunSpec = serde_json::from_value(value).expect("failed to deserialize run spec");
+	if let Some(size) = spec.plot.marker_size {
+		if size < 1 {
+			spec.plot.marker_size = None;
+		}
+	}
 	derive_outputs(&mut spec);
 	validate_run_spec(&spec);
 	spec
