@@ -11,9 +11,9 @@ fn square_side(view: &PlotView) -> (u32, u32) {
 	(side, side)
 }
 
-fn data_y_range(points: &[(f64, f64)], fallback: (f64, f64)) -> (f64, f64) {
+fn data_y_range(points: &[(f64, f64)]) -> (f64, f64) {
 	if points.is_empty() {
-		return fallback;
+		return (-4.0, 4.0);
 	}
 	let mut min_y = points[0].1;
 	let mut max_y = points[0].1;
@@ -95,9 +95,10 @@ fn draw_static_chart<B: DrawingBackend>(
 	let _ = area.present();
 }
 
+
 pub fn save_static(points: &[(f64, f64)], view: &PlotView, out_png: &str, out_svg: &str) {
 	let (w, h) = square_side(view);
-	let (y_min, y_max) = data_y_range(points, (view.omega_min, view.omega_max));
+	let (y_min, y_max) = data_y_range(points);
 	let x_ticks: Vec<i32> = (-4..=4).collect();
 	let y_ticks = integer_ticks_in_range(y_min, y_max);
 	let r = marker_radius(w);
@@ -107,9 +108,10 @@ pub fn save_static(points: &[(f64, f64)], view: &PlotView, out_png: &str, out_sv
 	draw_static_chart(svg_backend.into_drawing_area(), view, points, y_min, y_max, &x_ticks, &y_ticks, r);
 }
 
+
 pub fn save_html(points: &[(f64, f64)], view: &PlotView, out_html: &str) {
 	let (w, h) = square_side(view);
-	let (y_min, y_max) = data_y_range(points, (view.omega_min, view.omega_max));
+	let (y_min, y_max) = data_y_range(points);
 	let xs: Vec<f64> = points.iter().map(|(x, _)| *x).collect();
 	let ys: Vec<f64> = points.iter().map(|(_, y)| *y).collect();
 	let mut x_tick_vals = Vec::new();

@@ -44,7 +44,6 @@ pub fn validate_run_spec(spec: &RunSpec) {
 	assert!(spec.phys.omega_d > 0.0, "drive frequency must be positive");
 	assert!(spec.integrator.n_periods_warmup >= 0, "warmup periods must be non-negative");
 	assert!(spec.integrator.n_periods_samples > 0, "sample periods must be positive");
-	assert!(spec.plot.omega_min < spec.plot.omega_max, "omega range must be increasing");
 	assert!(spec.plot.width_px >= 200, "plot width must be at least 200");
 	assert!(spec.plot.height_px >= 200, "plot height must be at least 200");
 	assert!(!spec.output.out_base.trim().is_empty(), "output base cannot be empty");

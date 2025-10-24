@@ -22,8 +22,6 @@
   "plot": {
     "theta_min": -3.141592653589793,
     "theta_max": 3.141592653589793,
-    "omega_min": -2.0,
-    "omega_max": 3.0,
     "width_px": 1200,
     "height_px": 900,
     "title": "Poincaré Section (F_D = 1.2, RK4)"
