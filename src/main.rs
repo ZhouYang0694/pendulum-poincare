@@ -10,5 +10,5 @@ fn main() {
 	save_all(&points, &spec.plot, &spec.output.out_base);
 	let points_roi: Vec<(f64, f64)> = points.iter().copied().filter(|(theta, _)| *theta > 2.0).collect();
 	let roi_base = format!("{}__theta_gt_2", spec.output.out_base);
-	save_all_x(&points_roi, &spec.plot, &roi_base, 1.5, 4.0);
+	save_all_x(&points_roi, &spec.plot, &roi_base, 1.9, 3.3);
 }

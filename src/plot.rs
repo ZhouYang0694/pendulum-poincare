@@ -32,8 +32,8 @@ fn data_y_range(points: &[(f64, f64)]) -> (f64, f64) {
 	}
 	let span = (max_y - min_y).max(0.2);
 	let pad = 0.05 * span;
-	let y_min = (min_y - pad).floor();
-	let y_max = (max_y + pad).ceil();
+	let y_min = min_y - pad;
+	let y_max = max_y + pad;
 	(y_min, y_max)
 }
 
