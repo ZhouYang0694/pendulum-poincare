@@ -4,6 +4,7 @@ use plotly::layout::Axis;
 use plotly::{Layout, Plot, Scatter};
 use plotters::coord::Shift;
 use plotters::prelude::*;
+use std::path::Path;
 use std::f64::consts::PI;
 
 fn draw_chart<B: DrawingBackend>(area: DrawingArea<B, Shift>, view: &PlotView, points: &[(f64, f64)]) {
@@ -42,9 +43,13 @@ pub fn save_html(points: &[(f64, f64)], view: &PlotView, out_html: &str) {
 }
 
 pub fn save_all(points: &[(f64, f64)], view: &PlotView, out_base: &str) {
-	let out_png = format!("{}.png", out_base);
-	let out_svg = format!("{}.svg", out_base);
-	let out_html = format!("{}.html", out_base);
+	let output_dir = Path::new("output");
+	std::fs::create_dir_all(output_dir).expect("failed to create output directory");
+	let base_path = output_dir.join(out_base);
+	let base_str = base_path.to_string_lossy().into_owned();
+	let out_png = format!("{base_str}.png");
+	let out_svg = format!("{base_str}.svg");
+	let out_html = format!("{base_str}.html");
 	save_static(points, view, &out_png, &out_svg);
 	save_html(points, view, &out_html);
 }
