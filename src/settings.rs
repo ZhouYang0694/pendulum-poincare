@@ -26,15 +26,9 @@ pub fn load_run_spec(path: &str) -> RunSpec {
 		panic!("run spec root must be a JSON object");
 	}
 	let mut spec: RunSpec = serde_json::from_value(value).expect("failed to deserialize run spec");
-	coerce_fixed_theta_range(&mut spec.plot);
 	derive_outputs(&mut spec);
 	validate_run_spec(&spec);
 	spec
-}
-
-pub fn coerce_fixed_theta_range(view: &mut PlotView) {
-	view.theta_min = -std::f64::consts::PI;
-	view.theta_max = std::f64::consts::PI;
 }
 
 pub fn validate_run_spec(spec: &RunSpec) {
@@ -44,8 +38,7 @@ pub fn validate_run_spec(spec: &RunSpec) {
 	assert!(spec.phys.omega_d > 0.0, "drive frequency must be positive");
 	assert!(spec.integrator.n_periods_warmup >= 0, "warmup periods must be non-negative");
 	assert!(spec.integrator.n_periods_samples > 0, "sample periods must be positive");
-	assert!(spec.plot.width_px >= 200, "plot width must be at least 200");
-	assert!(spec.plot.height_px >= 200, "plot height must be at least 200");
+	assert!(spec.plot.side_px >= 200, "plot side length must be at least 200");
 	assert!(!spec.output.out_base.trim().is_empty(), "output base cannot be empty");
 }
 

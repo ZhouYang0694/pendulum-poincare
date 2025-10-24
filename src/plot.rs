@@ -7,7 +7,7 @@ use plotters::prelude::*;
 use std::path::Path;
 
 fn square_side(view: &PlotView) -> (u32, u32) {
-	let side = view.width_px.min(view.height_px);
+	let side = view.side_px;
 	(side, side)
 }
 

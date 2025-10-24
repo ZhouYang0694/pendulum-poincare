@@ -20,10 +20,7 @@
     "wrap_to_pi": true
   },
   "plot": {
-    "theta_min": -3.141592653589793,
-    "theta_max": 3.141592653589793,
-    "width_px": 1200,
-    "height_px": 900,
+    "side_px": 1200,
     "title": "Poincaré Section (F_D = 1.2, RK4)"
   },
   "output": {

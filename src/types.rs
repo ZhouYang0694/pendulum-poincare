@@ -42,10 +42,7 @@ pub struct OutputConfig {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct PlotView {
-    pub theta_min: f64,
-    pub theta_max: f64,
-    pub width_px: u32,
-    pub height_px: u32,
+    pub side_px: u32,
     pub title: String
 }
 
