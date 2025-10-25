@@ -51,7 +51,10 @@ pub struct OutputConfig {
 pub struct PlotView {
     pub side_px: u32,
     pub title: String,
-    pub marker_size: Option<u32>
+    pub marker_size: Option<u32>,
+    pub title_font_px: Option<u32>,
+    pub axis_label_font_px: Option<u32>,
+    pub tick_font_px: Option<u32>
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

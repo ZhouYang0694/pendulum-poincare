@@ -64,6 +64,51 @@ fn effective_marker_radius(view: &PlotView, side_px: u32) -> i32 {
 	}
 }
 
+fn title_font_px(view: &PlotView) -> i32 {
+	view.title_font_px.unwrap_or(64) as i32
+}
+
+fn axis_label_font_px(view: &PlotView) -> i32 {
+	view.axis_label_font_px.unwrap_or(36) as i32
+}
+
+fn tick_font_px(view: &PlotView) -> i32 {
+	view.tick_font_px.unwrap_or(28) as i32
+}
+
+fn html_font(size: i32) -> usize {
+	if size <= 0 { 1 } else { size as usize }
+}
+
+fn left_label_area(view: &PlotView) -> u32 {
+	let tick = tick_font_px(view).max(1);
+	let axis = axis_label_font_px(view).max(1);
+	let base = tick * 2 + axis;
+	base.max(110) as u32
+}
+
+fn bottom_label_area(view: &PlotView) -> u32 {
+	let tick = tick_font_px(view).max(1);
+	let axis = axis_label_font_px(view).max(1);
+	let base = tick * 2 + axis;
+	base.max(90) as u32
+}
+
+fn top_margin(view: &PlotView) -> usize {
+	let title = title_font_px(view).max(1);
+	((title * 2).max(60)) as usize
+}
+
+fn right_margin(view: &PlotView) -> usize {
+	let tick = tick_font_px(view).max(1);
+	((tick + 30).max(60)) as usize
+}
+
+fn static_margin_right(view: &PlotView) -> i32 {
+	let tick = tick_font_px(view).max(1);
+	(tick + 40).max(60) as i32
+}
+
 fn draw_static_chart<B: DrawingBackend>(
 	area: DrawingArea<B, Shift>,
 	view: &PlotView,
@@ -78,18 +123,21 @@ fn draw_static_chart<B: DrawingBackend>(
 ) {
 	let _ = area.fill(&WHITE);
 	let mut builder = ChartBuilder::on(&area);
-	builder.margin(20).caption(view.title.clone(), ("sans-serif", 28));
 	builder
-		.set_label_area_size(LabelAreaPosition::Left, 110)
-		.set_label_area_size(LabelAreaPosition::Bottom, 90);
+		.margin(20)
+		.margin_right(static_margin_right(view))
+		.caption(view.title.clone(), ("sans-serif", title_font_px(view)));
+	builder
+		.set_label_area_size(LabelAreaPosition::Left, left_label_area(view))
+		.set_label_area_size(LabelAreaPosition::Bottom, bottom_label_area(view));
 	if let Ok(mut chart) = builder.build_cartesian_2d(x_min..x_max, y_min..y_max) {
 		let mut mesh = chart.configure_mesh();
 		let _ = mesh
 			.disable_mesh()
 			.x_desc("θ (radians)")
 			.y_desc("ω (radians/s)")
-			.axis_desc_style(("sans-serif", 22))
-			.label_style(("sans-serif", 18))
+			.axis_desc_style(("sans-serif", axis_label_font_px(view)))
+			.label_style(("sans-serif", tick_font_px(view)))
 			.x_labels(rx.len())
 			.x_label_formatter(&|v| format!("{:.0}", v))
 			.y_labels(ry.len().max(2))
@@ -135,27 +183,28 @@ fn save_html_with_x(points: &[(f64, f64)], view: &PlotView, out_html: &str, x_mi
 	let trace = Scatter::new(xs, ys)
 		.mode(Mode::Markers)
 		.marker(Marker::new().size(effective_marker_radius(view, w) as usize).opacity(0.8).color("black"));
+	let tick_font = html_font(tick_font_px(view));
+	let axis_label_font = html_font(axis_label_font_px(view));
+	let title_font = html_font(title_font_px(view));
 	let x_axis = Axis::new()
 		.range(vec![x_min, x_max])
 		.show_grid(false)
 		.zero_line(false)
 		.show_line(true)
-		.mirror(true)
 		.line_color("black")
 		.tick_values(x_tick_vals.clone())
 		.tick_text(x_tick_vals.iter().map(|v| format!("{:.0}", v)).collect())
-		.tick_font(Font::new().size(18))
-		.title(Title::new("θ (radians)").font(Font::new().size(22)));
+		.tick_font(Font::new().size(tick_font))
+		.title(Title::new("θ (radians)").font(Font::new().size(axis_label_font)));
 	let y_axis = {
 		let axis = Axis::new()
 			.range(vec![y_min, y_max])
 			.show_grid(false)
 			.zero_line(false)
 			.show_line(true)
-			.mirror(true)
 			.line_color("black")
-			.tick_font(Font::new().size(18))
-			.title(Title::new("ω (radians/s)").font(Font::new().size(22)));
+			.tick_font(Font::new().size(tick_font))
+			.title(Title::new("ω (radians/s)").font(Font::new().size(axis_label_font)));
 		if y_tick_vals.is_empty() {
 			axis
 		} else {
@@ -165,10 +214,16 @@ fn save_html_with_x(points: &[(f64, f64)], view: &PlotView, out_html: &str, x_mi
 		}
 	};
 	let layout = Layout::new()
-		.title(Title::new(&view.title).font(Font::new().size(28)))
+		.title(Title::new(&view.title).font(Font::new().size(title_font)))
 		.width(w as usize)
 		.height(h as usize)
-		.margin(Margin::new().left(110).right(30).top(60).bottom(90))
+		.margin(
+			Margin::new()
+				.left(left_label_area(view) as usize)
+				.right(right_margin(view))
+				.top(top_margin(view))
+				.bottom(bottom_label_area(view) as usize),
+		)
 		.x_axis(x_axis)
 		.y_axis(y_axis);
 	let mut plot = Plot::new();
