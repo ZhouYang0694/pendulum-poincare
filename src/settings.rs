@@ -31,6 +31,31 @@ pub fn load_run_spec(path: &str) -> RunSpec {
 			spec.plot.marker_size = None;
 		}
 	}
+	if spec.plot.title_font_px.unwrap_or(0) < 8 {
+		spec.plot.title_font_px = Some(64);
+	}
+	if spec.plot.axis_label_font_px.unwrap_or(0) < 8 {
+		spec.plot.axis_label_font_px = Some(36);
+	}
+	if spec.plot.tick_font_px.unwrap_or(0) < 6 {
+		spec.plot.tick_font_px = Some(28);
+	}
+	let period = drive_period(spec.phys.omega_d);
+	if spec.integrator.rtol.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.rtol = Some(1e-8);
+	}
+	if spec.integrator.atol.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.atol = Some(1e-10);
+	}
+	if spec.integrator.dt_init.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.dt_init = Some(period / 400.0);
+	}
+	if spec.integrator.dt_min.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.dt_min = Some(period / 20000.0);
+	}
+	if spec.integrator.dt_max.unwrap_or(0.0) <= 0.0 {
+		spec.integrator.dt_max = Some(period / 20.0);
+	}
 	derive_outputs(&mut spec);
 	validate_run_spec(&spec);
 	spec
@@ -44,6 +69,15 @@ pub fn validate_run_spec(spec: &RunSpec) {
 	assert!(spec.integrator.n_periods_warmup >= 0, "warmup periods must be non-negative");
 	assert!(spec.integrator.n_periods_samples > 0, "sample periods must be positive");
 	assert!(spec.plot.side_px >= 200, "plot side length must be at least 200");
+	if let Some(size) = spec.plot.title_font_px {
+		assert!(size >= 8, "title font size must be at least 8");
+	}
+	if let Some(size) = spec.plot.axis_label_font_px {
+		assert!(size >= 8, "axis label font size must be at least 8");
+	}
+	if let Some(size) = spec.plot.tick_font_px {
+		assert!(size >= 6, "tick font size must be at least 6");
+	}
 	assert!(!spec.output.out_base.trim().is_empty(), "output base cannot be empty");
 }
 

@@ -3,7 +3,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 pub enum IntegratorMethod {
     EulerCromer,
-    RK4
+    RK4,
+    RK45,
+    BulirschStoer
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
@@ -20,7 +22,12 @@ pub struct IntegratorParams {
     pub method: IntegratorMethod,
     pub dt_user: Option<f64>,
     pub n_periods_warmup: usize,
-    pub n_periods_samples: usize
+    pub n_periods_samples: usize,
+    pub rtol: Option<f64>,
+    pub atol: Option<f64>,
+    pub dt_init: Option<f64>,
+    pub dt_min: Option<f64>,
+    pub dt_max: Option<f64>
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
@@ -44,7 +51,10 @@ pub struct OutputConfig {
 pub struct PlotView {
     pub side_px: u32,
     pub title: String,
-    pub marker_size: Option<u32>
+    pub marker_size: Option<u32>,
+    pub title_font_px: Option<u32>,
+    pub axis_label_font_px: Option<u32>,
+    pub tick_font_px: Option<u32>
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

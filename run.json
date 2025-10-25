@@ -7,10 +7,10 @@
     "omega_d": 0.6666666666666666
   },
   "integrator": {
-    "method": "RK4",
-    "dt_user": 0.02,
+    "method": "RK45",
+    "dt_user": 0.0003,
     "n_periods_warmup": 300,
-    "n_periods_samples": 2500
+    "n_periods_samples": 1000000
   },
   "init": {
     "theta0": 0.2,
@@ -21,9 +21,12 @@
     "wrap_to_pi": true
   },
   "plot": {
-    "side_px": 1200,
-    "title": "Poincaré Section (F_D = 1.2, RK4)",
-    "marker_size": 1
+    "side_px": 20000,
+    "title": "Poincaré Section (F_D = 1.2, RK45)",
+    "marker_size": 1,
+    "title_font_px": 600,
+    "axis_label_font_px": 400,
+    "tick_font_px": 400
   },
   "output": {
     "out_base": "fig3_9"
